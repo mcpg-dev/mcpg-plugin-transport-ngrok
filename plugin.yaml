@@ -1,0 +1,23 @@
+schema: mcpg.dev/plugin/v1
+id: dev.mcpg.transport.ngrok
+name: ngrok Transport
+license: Apache-2.0
+description: |
+  Serves the gateway at an ngrok endpoint. The plugin opens an outbound
+  ngrok session (no inbound port, no public IP), listens on an HTTP
+  endpoint, and hands every request to the gateway's own HTTP router, so
+  identity, OAuth discovery, per-IP rate limits (keyed on the client
+  address ngrok reports), SSE and both MCP revisions behave as on the
+  gateway's HTTP listener. Configure it as an entry of
+  `gateway.server.transports` with `authtoken` (from ${env.NGROK_AUTHTOKEN}),
+  an optional reserved `domain`, an optional ngrok Traffic Policy that runs
+  at ngrok's edge, `binding` (public, internal, kubernetes), `pooling`, and
+  CIDR allow and deny lists. The endpoint URL becomes the gateway's public
+  address for webhook callbacks. ngrok terminates TLS at its edge and sees
+  the traffic in plaintext.
+class: transport
+runtime: native-cdylib-v1
+protocol_version: "1.0"
+required_capabilities:
+  - network_outbound
+  - transport_listen
