@@ -1,6 +1,6 @@
 [package]
 name = "mcpg-plugin-transport-ngrok"
-version = "0.1.0-rc.4"
+version = "0.1.0-rc.6"
 license = "Apache-2.0"
 edition = "2024"
 description = "ngrok transport plugin (dev.mcpg.transport.ngrok): serves the gateway at an ngrok endpoint with no inbound port"
@@ -20,7 +20,7 @@ static-firstparty = []
 [dependencies]
 mcpg-plugin-protocol = { git = "https://github.com/mcpg-dev/mcpg-plugin-protocol", tag = "v0.1.0-rc.8", version = "=0.1.0-rc.8" }
 mcpg-plugin-sdk = { git = "https://github.com/mcpg-dev/mcpg-plugin-sdk", tag = "v0.1.0-rc.13", version = "=0.1.0-rc.13" }
-mcpg-plugin-http-ingress = { git = "https://github.com/mcpg-dev/mcpg-plugin-http-ingress", tag = "v0.1.0-rc.2", version = "=0.1.0-rc.2" }
+mcpg-plugin-http-ingress = { git = "https://github.com/mcpg-dev/mcpg-plugin-http-ingress", tag = "v0.1.0-rc.4", version = "=0.1.0-rc.4" }
 futures-util = { version = "0.3", default-features = false, features = ["std"] }
 ngrok = { version = "=0.19.0", default-features = false, features = ["aws-lc-rs"] }
 serde = { version = "1.0", features = ["derive"] }
