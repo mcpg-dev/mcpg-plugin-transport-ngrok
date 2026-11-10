@@ -14,6 +14,7 @@ use std::sync::mpsc;
 use std::time::Duration;
 
 use futures_util::StreamExt as _;
+use mcpg_plugin_http_ingress::{Connection, serve_connection};
 use mcpg_plugin_protocol::transport::{TransportError, TransportWire};
 use mcpg_plugin_protocol::{PluginClass, PluginManifest};
 use mcpg_plugin_sdk::declare_plugin;
@@ -30,10 +31,8 @@ use tokio_util::sync::CancellationToken;
 use tokio_util::task::TaskTracker;
 
 mod config;
-mod serve;
 
 pub use config::NgrokConfig;
-pub use serve::serve_connection;
 
 const PLUGIN_ID: &str = "dev.mcpg.transport.ngrok";
 
@@ -315,7 +314,12 @@ async fn accept_loop(
                 let kill = kill.clone();
                 tasks.spawn(async move {
                     tokio::select! {
-                        () = serve_connection(conn, server, remote, max_body) => {}
+                        () = serve_connection(
+                            conn,
+                            server,
+                            Connection::from_addr(remote, max_body),
+                            "ngrok",
+                        ) => {}
                         () = kill.cancelled() => {}
                     }
                 });
