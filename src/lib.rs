@@ -1,10 +1,10 @@
 //! `dev.mcpg.transport.ngrok` — serve the gateway at an ngrok endpoint.
 //!
-//! An `http`-wire transport: the plugin opens an ngrok session (outbound
-//! only, no inbound port), listens on an HTTP endpoint, and hands every
-//! request to the gateway, whose own router answers it. Identity, OAuth
-//! discovery, per-IP rate limits (keyed on the client address ngrok
-//! reports), SSE and both MCP revisions behave as on the HTTP listener.
+//! The plugin opens an ngrok session (outbound only, no inbound port),
+//! listens on an HTTP endpoint, and hands every request to the gateway,
+//! whose own router answers it. Identity, OAuth discovery, per-IP rate
+//! limits (keyed on the client address ngrok reports), SSE and MCP
+//! 2026-07-28 behave as on the HTTP listener.
 //!
 //! ngrok's session reconnects by itself after a network failure and binds
 //! the endpoint again. The endpoint URL is the transport's listen address;
@@ -15,12 +15,10 @@ use std::time::Duration;
 
 use futures_util::StreamExt as _;
 use mcpg_plugin_http_ingress::{Connection, serve_connection};
-use mcpg_plugin_protocol::transport::{TransportError, TransportWire};
+use mcpg_plugin_protocol::transport::TransportError;
 use mcpg_plugin_protocol::{PluginClass, PluginManifest};
 use mcpg_plugin_sdk::declare_plugin;
-use mcpg_plugin_sdk::ffi::{
-    SyncMessageDispatcher, SyncTransport, SyncTransportHandle, WatchHandleBox,
-};
+use mcpg_plugin_sdk::ffi::{SyncTransport, SyncTransportHandle, WatchHandleBox};
 use mcpg_plugin_sdk::http_ingress::HttpIngressServer;
 use ngrok::Session;
 use ngrok::config::TunnelBuilder as _;
@@ -133,20 +131,6 @@ impl SyncTransport for NgrokTransport {
 
     fn name(&self) -> &str {
         "ngrok-v1"
-    }
-
-    fn wire(&self) -> TransportWire {
-        TransportWire::Http
-    }
-
-    fn start(
-        &self,
-        _listener_config: &serde_json::Value,
-        _dispatcher: std::sync::Arc<dyn SyncMessageDispatcher>,
-    ) -> Result<SyncTransportHandle, TransportError> {
-        Err(TransportError::InvalidConfig {
-            message: format!("{PLUGIN_ID} hands the gateway HTTP requests, not JSON-RPC messages"),
-        })
     }
 
     fn start_http(
@@ -397,15 +381,6 @@ mod tests {
     }
 
     #[test]
-    fn it_is_an_http_wire_transport_and_refuses_the_messages_wire() {
-        let plugin = NgrokTransport::new("{}");
-        assert_eq!(plugin.wire(), TransportWire::Http);
-        let dispatcher: std::sync::Arc<dyn SyncMessageDispatcher> = std::sync::Arc::new(NoDispatch);
-        let err = plugin.start(&json!({}), dispatcher).err().unwrap();
-        assert!(matches!(err, TransportError::InvalidConfig { .. }));
-    }
-
-    #[test]
     fn a_bad_config_is_refused_before_any_network_call() {
         let plugin = NgrokTransport::new("{}");
         let server = HttpIngressServer::from_ffi(mcpg_plugin_protocol::abi::HttpServerRef {
@@ -427,17 +402,6 @@ mod tests {
             "bad token <redacted>: ERR_NGROK_105"
         );
         assert_eq!(redact("x", ""), "x");
-    }
-
-    struct NoDispatch;
-    impl SyncMessageDispatcher for NoDispatch {
-        fn dispatch(
-            &self,
-            _session_id: &str,
-            _message: &[u8],
-        ) -> Result<Vec<u8>, mcpg_plugin_protocol::transport::DispatcherError> {
-            unreachable!()
-        }
     }
 
     extern "C" fn never_serve(

@@ -4,14 +4,14 @@ A **transport** plugin that serves the gateway at an
 [ngrok](https://ngrok.com) endpoint. The plugin opens an outbound ngrok
 session, so the gateway needs no inbound port and no public IP.
 
-It is an `http`-wire transport: it does not parse MCP. It hands every HTTP
-request it receives to the gateway's own HTTP router. These features
-therefore work as on the gateway's HTTP listener:
+The plugin does not parse MCP. It hands every HTTP request it receives to
+the gateway's own HTTP router. These features therefore work as on the
+gateway's HTTP listener:
 
 - identity and OAuth discovery (the `Host` header is the ngrok domain),
 - per-IP rate limits, keyed on the client address that ngrok reports,
 - SSE streams,
-- both MCP revisions (`2025-11-25` and `2026-07-28`).
+- MCP `2026-07-28`.
 
 ## How a request flows
 
@@ -84,9 +84,9 @@ not reserved.
   A Traffic Policy is an additional layer at the edge.
 - The authtoken never appears in logs or in error text.
 - A pooled endpoint sends a client's requests to any gateway in the pool.
-  On the `2025-11-25` wire, MCP sessions then need a shared session store
-  (cluster mode), or the clients must use the stateless `2026-07-28`
-  revision.
+  MCP `2026-07-28` is stateless, so any gateway answers any request. Task
+  and subscription state that outlives one request needs a shared store
+  (cluster mode).
 
 ## License
 

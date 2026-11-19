@@ -7,7 +7,7 @@ description: |
   ngrok session (no inbound port, no public IP), listens on an HTTP
   endpoint, and hands every request to the gateway's own HTTP router, so
   identity, OAuth discovery, per-IP rate limits (keyed on the client
-  address ngrok reports), SSE and both MCP revisions behave as on the
+  address ngrok reports), SSE and MCP 2026-07-28 behave as on the
   gateway's HTTP listener. Configure it as an entry of
   `gateway.server.transports` with `authtoken` (from ${env.NGROK_AUTHTOKEN}),
   an optional reserved `domain`, an optional ngrok Traffic Policy that runs
